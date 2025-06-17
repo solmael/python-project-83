@@ -1,0 +1,14 @@
+*.egg-info
+__pycache__
+dist/
+*.pyc
+.venv
+.coverage
+.python-version
+coverage.xml
+*_cache/
+some_draft.py
+.python-version
+.coverage 
+demo.ca
+demo.cast
