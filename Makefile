@@ -1,5 +1,5 @@
 install:
-    uv sync
+    uv sync --no-install-project
 
 dev:
     uv run flask --debug --app page_analyzer:app run
