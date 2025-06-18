@@ -22,4 +22,4 @@ dev-dependencies = [
 ]
 
 [tool.setuptools]
-package-dir = { "" = "page_analyzer" }
+package-dir = { "hexlet_code" = "page_analyzer" }

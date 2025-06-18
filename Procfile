@@ -1,1 +1,1 @@
-web: gunicorn page_analyzer:app -b 0.0.0.0:$PORT
+web: gunicorn hexlet_code:app -b 0.0.0.0:$PORT
