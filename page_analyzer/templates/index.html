@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+
+{% block styles %}
+<style>
+    .card {
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background-color: #f8f9fa;
+    }
+    .form-control {
+        width: 400px;
+        border-color: #ced4da;
+    }
+    .btn-primary {
+        width: 150px;
+        font-weight: bold;
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    .input-group {
+        display: flex;
+        gap: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block title %}Главная страница{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1 class="mb-4 text-center">Анализатор страниц</h1>
+    <p class="mb-4 text-center">Бесплатно проверяйте сайты на SEO-пригодность</p>
+    <div class="input-group mb-3 d-flex justify-content-center">
+        <input type="url" 
+               class="form-control" 
+               placeholder="Введите URL https://www.example.com" 
+               name="url" 
+               required
+               autofocus>
+        <button class="btn btn-primary" type="submit">ПРОВЕРИТЬ</button>
+    </div>
+</div>
+{% endblock %}
