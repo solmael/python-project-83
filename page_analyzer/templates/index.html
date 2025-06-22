@@ -31,14 +31,16 @@
 <div class="card">
     <h1 class="mb-4 text-center">Анализатор страниц</h1>
     <p class="mb-4 text-center">Бесплатно проверяйте сайты на SEO-пригодность</p>
-    <div class="input-group mb-3 d-flex justify-content-center">
-        <input type="url" 
-               class="form-control" 
-               placeholder="Введите URL https://www.example.com" 
-               name="url" 
-               required
-               autofocus>
-        <button class="btn btn-primary" type="submit">ПРОВЕРИТЬ</button>
-    </div>
+    <form action="/" method="post" class="position-relative">
+        <div class="input-group mb-3 d-flex justify-content-center">
+            <input type="text"
+                   name="url"
+                   class="form-control {% if get_flashed_messages(category_filter=['error']) %}is-invalid{% endif %}"
+                   placeholder="Введите URL https://www.example.com" 
+                   value="{{ request.form['url'] if request.method == 'POST' else '' }}"
+                   autofocus>
+            <button class="btn btn-primary" type="submit">ПРОВЕРИТЬ</button>
+        </div>
+    </form>
 </div>
 {% endblock %}
