@@ -60,6 +60,37 @@ def index():
 
     return render_template('index.html')
 
+
+@app.route('/urls/<int:id>/checks', methods=['POST'])
+def create_check(id):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    try:
+        cur.execute("SELECT * FROM urls WHERE id = %s", (id,))
+        url = cur.fetchone()
+        if not url:
+            return "URL не найден", 404
+        
+        cur.execute(
+            "INSERT INTO url_checks (url_id) VALUES (%s) RETURNING id",
+            (id,)
+        )
+        check_id = cur.fetchone()[0]
+        conn.commit()
+        
+        flash('Проверка запущена', 'success')
+        return redirect(url_for('url_detail', id=id))
+    
+    except Exception as e:
+        app.logger.error(f"Ошибка создания проверки: {e}")
+        conn.rollback()
+        flash('Ошибка создания проверки', 'error')
+        return redirect(url_for('url_detail', id=id))
+    finally:
+        cur.close()
+        conn.close()
+
 @app.route('/add-url')
 def add_url():
     return render_template('add_url.html')
@@ -68,21 +99,43 @@ def add_url():
 def urls():
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute("SELECT * FROM urls ORDER BY created_at DESC")
-    urls = cur.fetchall()
-    cur.close()
-    conn.close()
-    return render_template('urls.html', urls=urls)
+    
+    try:
+        cur.execute("SELECT * FROM urls ORDER BY created_at DESC")
+        urls = cur.fetchall()
+        
+        return render_template('urls.html', urls=urls)
+    
+    except Exception as e:
+        app.logger.error(f"Ошибка получения списка URL: {e}")
+        flash('Ошибка загрузки данных', 'error')
+        return redirect(url_for('index'))
+    
+    finally:
+        cur.close()
+        conn.close()
 
 @app.route('/urls/<int:id>')
 def url_detail(id):
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute("SELECT * FROM urls WHERE id = %s", (id,))
-    url = cur.fetchone()
-    cur.close()
-    conn.close()
-    if not url:
-        flash('URL не найден', 'error')
-        return "URL не найден", 404
-    return render_template('url_detail.html', url=url)
+    
+    try:
+        cur.execute("SELECT * FROM urls WHERE id = %s", (id,))
+        url = cur.fetchone()
+        
+        cur.execute("SELECT * FROM url_checks WHERE url_id = %s ORDER BY created_at DESC", (id,))
+        checks = cur.fetchall()
+        
+        if not url:
+            return "URL не найден", 404
+        
+        return render_template('url_detail.html', url=url, checks=checks)
+    
+    except Exception as e:
+        app.logger.error(f"Ошибка получения данных: {e}")
+        flash('Ошибка загрузки данных', 'error')
+        return redirect(url_for('index'))
+    finally:
+        cur.close()
+        conn.close()
