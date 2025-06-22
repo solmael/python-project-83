@@ -12,3 +12,4 @@ some_draft.py
 .coverage 
 demo.ca
 demo.cast
+.env
