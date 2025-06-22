@@ -8,7 +8,8 @@ dependencies = [
     "Flask",
     "python-dotenv",
     "gunicorn",
-    "psycopg2-binary"
+    "psycopg2-binary",
+    "validators"
 ]
 
 [build-system]
