@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
-import os
-from dotenv import load_dotenv
-import psycopg2
 import logging
-from .url_validator import validate_url
+import os
+
+from dotenv import load_dotenv
+from flask import Flask, flash, redirect, render_template, request, url_for
+
+from .repository import DatabaseError, UrlAlreadyExists, UrlRepository
 
 load_dotenv()
 
@@ -16,44 +17,24 @@ logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'fallback-secret-key')
 
+url_repo = UrlRepository(DATABASE_URL)
 
-def get_db_connection():
-    try:
-        return psycopg2.connect(DATABASE_URL)
-    except Exception as e:
-        app.logger.error(f"Ошибка подключения к БД: {e}")
-        return None
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    error = None
     if request.method == 'POST':
         url = request.form['url'].strip()
-
-        normalized_url, error = validate_url(url)
-
-        if error:
-            flash(error, 'error')
-            return redirect(url_for('index'))
-
         try:
-            conn = get_db_connection()
-            cur = conn.cursor()
-            cur.execute("INSERT INTO urls (name) VALUES (%s) RETURNING id", (normalized_url,))
-            url_id = cur.fetchone()[0]
-            conn.commit()
-            cur.close()
-            conn.close()
-
+            url_id = url_repo.add_url(url)
             flash('URL успешно добавлен', 'success')
             return redirect(url_for('url_detail', id=url_id))
-
-        except psycopg2.IntegrityError as e:
-            conn.rollback()
-            flash('URL уже существует', 'error')
+        except ValueError as e:
+            flash(str(e), 'error')
             return redirect(url_for('index'))
-
-        except Exception as e:
+        except UrlAlreadyExists as e:
+            flash(str(e), 'error')
+            return redirect(url_for('index'))
+        except DatabaseError as e:
             app.logger.error(f"Ошибка добавления в БД: {e}")
             flash('Ошибка добавления URL', 'error')
             return redirect(url_for('index'))
@@ -61,81 +42,39 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/urls/<int:id>/checks', methods=['POST'])
-def create_check(id):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    
-    try:
-        cur.execute("SELECT * FROM urls WHERE id = %s", (id,))
-        url = cur.fetchone()
-        if not url:
-            return "URL не найден", 404
-        
-        cur.execute(
-            "INSERT INTO url_checks (url_id) VALUES (%s) RETURNING id",
-            (id,)
-        )
-        check_id = cur.fetchone()[0]
-        conn.commit()
-        
-        flash('Проверка запущена', 'success')
-        return redirect(url_for('url_detail', id=id))
-    
-    except Exception as e:
-        app.logger.error(f"Ошибка создания проверки: {e}")
-        conn.rollback()
-        flash('Ошибка создания проверки', 'error')
-        return redirect(url_for('url_detail', id=id))
-    finally:
-        cur.close()
-        conn.close()
-
-@app.route('/add-url')
-def add_url():
-    return render_template('add_url.html')
-
-@app.route('/urls')
-def urls():
-    conn = get_db_connection()
-    cur = conn.cursor()
-    
-    try:
-        cur.execute("SELECT * FROM urls ORDER BY created_at DESC")
-        urls = cur.fetchall()
-        
-        return render_template('urls.html', urls=urls)
-    
-    except Exception as e:
-        app.logger.error(f"Ошибка получения списка URL: {e}")
-        flash('Ошибка загрузки данных', 'error')
-        return redirect(url_for('index'))
-    
-    finally:
-        cur.close()
-        conn.close()
-
 @app.route('/urls/<int:id>')
 def url_detail(id):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    
     try:
-        cur.execute("SELECT * FROM urls WHERE id = %s", (id,))
-        url = cur.fetchone()
-        
-        cur.execute("SELECT * FROM url_checks WHERE url_id = %s ORDER BY created_at DESC", (id,))
-        checks = cur.fetchall()
-        
-        if not url:
-            return "URL не найден", 404
-        
+        url = url_repo.get_url_by_id(id)
+        checks = url_repo.get_checks_by_url_id(id)
         return render_template('url_detail.html', url=url, checks=checks)
-    
-    except Exception as e:
+    except DatabaseError as e:
         app.logger.error(f"Ошибка получения данных: {e}")
         flash('Ошибка загрузки данных', 'error')
         return redirect(url_for('index'))
-    finally:
-        cur.close()
-        conn.close()
+
+
+@app.route('/urls')
+def urls():
+    try:
+        urls = url_repo.get_all_urls()
+        return render_template('urls.html', urls=urls)
+    except DatabaseError as e:
+        app.logger.error(f"Ошибка получения списка URL: {e}")
+        flash('Ошибка загрузки данных', 'error')
+        return redirect(url_for('index'))
+
+
+@app.route('/urls/<int:id>/checks', methods=['POST'])
+def create_check(id):
+    try:
+        success = url_repo.create_check(id)
+        if success:
+            flash('Проверка успешно выполнена', 'success')
+        else:
+            flash('URL не найден', 'error')
+        return redirect(url_for('url_detail', id=id))
+    except DatabaseError as e:
+        app.logger.error(f"Ошибка создания проверки: {e}")
+        flash('Ошибка создания проверки', 'error')
+        return redirect(url_for('url_detail', id=id))
