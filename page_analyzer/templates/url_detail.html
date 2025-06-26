@@ -2,57 +2,58 @@
 {% block title %}Детали URL{% endblock %}
 
 {% block content %}
-<div class="card">
-    <h2>Сайт: {{ url[1] }}</h2>
-    <table class="table">
+<h2>Сайт: {{ url[1] }}</h2>
+
+<table class="table">
+    <tr>
+        <th>ID</th>
+        <td>{{ url[0] }}</td>
+    </tr>
+    <tr>
+        <th style="white-space: nowrap;">Имя</th>
+        <td>{{ url[1] }}</td>
+    </tr>
+    <tr>
+        <th style="white-space: nowrap;">Дата создания</th>
+        <td>{{ url[2].strftime('%Y-%m-%d') }}</td>
+    </tr>
+</table>
+
+<form action="{{ url_for('create_check', id=url[0]) }}" method="post">
+    <button type="submit" class="btn btn-primary">Запустить проверку</button>
+</form>
+
+<h3>Проверки</h3>
+<style>
+    .table td,
+    .table th {
+        max-width: 500px;
+        overflow-wrap: break-word;
+    }
+</style>
+
+<table class="table" data-test="checks">
+    <thead>
         <tr>
             <th>ID</th>
-            <td>{{ url[0] }}</td>
-        </tr>
-        <tr>
-            <th>Имя</th>
-            <td>{{ url[1] }}</td>
-        </tr>
-        <tr>
+            <th>Код ответа</th>
+            <th>H1</th>
+            <th>Title</th>
+            <th>Описание</th>
             <th>Дата создания</th>
-            <td>{{ url[2].strftime('%Y-%m-%d') }}</td>
         </tr>
-    </table>
-
-    <form action="{{ url_for('create_check', id=url[0]) }}" method="post">
-        <button type="submit" class="btn btn-primary">Запустить проверку</button>
-    </form>
-
-    <h3>Проверки</h3>
-    <table class="table" data-test="checks">
-        <thead>
+    </thead>
+    <tbody>
+        {% for check in checks %}
             <tr>
-                <th>ID</th>
-                <th>Код ответа</th>
-                <th>H1</th>
-                <th>Title</th>
-                <th>Описание</th>
-                <th>Дата создания</th>
+                <td>{{ check[0] }}</td>
+                <td>{{ check[1] or '—' }}</td>
+                <td>{{ check[2] or '—' }}</td>
+                <td>{{ check[3] or '—' }}</td>
+                <td>{{ check[4] or '—' }}</td>
+                <td>{{ check[5] or '—' }}</td>
             </tr>
-        </thead>
-        <tbody>
-            {% for check in checks %}
-                <tr>
-                    <td>{{ check[0] }}</td>
-                    <td>{{ check[1] or '—' }}</td>
-                    <td>{{ check[2] or '—' }}</td>
-                    <td>{{ check[3] or '—' }}</td>
-                    <td>{{ check[4] or '—' }}</td>
-                    <td>
-                    {% if check[5] %}
-                        {{ check[5].strftime('%Y-%m-%d') }}
-                    {% else %}
-                        —
-                    {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}

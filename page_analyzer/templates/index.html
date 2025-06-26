@@ -8,19 +8,24 @@
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         background-color: #f8f9fa;
     }
+
+    .input-group {
+        display: flex;
+        gap: 10px;
+        width: 100%;
+    }
+
     .form-control {
-        width: 400px;
+        flex-grow: 1;
+        min-width: 400px;
         border-color: #ced4da;
     }
+
     .btn-primary {
         width: 150px;
         font-weight: bold;
         background-color: #0d6efd;
         border-color: #0d6efd;
-    }
-    .input-group {
-        display: flex;
-        gap: 10px;
     }
 </style>
 {% endblock %}
@@ -28,15 +33,16 @@
 {% block title %}Главная страница{% endblock %}
 
 {% block content %}
-<div class="card">
-    <h1 class="mb-4 text-center">Анализатор страниц</h1>
-    <p class="mb-4 text-center">Бесплатно проверяйте сайты на SEO-пригодность</p>
-    <form action="/" method="post" class="position-relative">
-        <div class="input-group mb-3 d-flex justify-content-center">
+<div class="card mx-auto" style="max-width: 800px;">
+    <h1>Анализатор страниц</h1>
+    <p>Бесплатно проверяйте сайты на SEO-пригодность</p>
+
+    <form action="/" method="post">
+        <div class="input-group mb-3">
             <input type="text"
                    name="url"
                    class="form-control {% if get_flashed_messages(category_filter=['error']) %}is-invalid{% endif %}"
-                   placeholder="Введите URL https://www.example.com" 
+                   placeholder="Введите URL https://www.example.com"    
                    value="{{ request.form['url'] if request.method == 'POST' else '' }}"
                    autofocus>
             <button class="btn btn-primary" type="submit">ПРОВЕРИТЬ</button>
