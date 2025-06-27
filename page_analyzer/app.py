@@ -29,11 +29,9 @@ def index():
             flash('URL успешно добавлен', 'success')
             return redirect(url_for('url_detail', id=url_id))
         except ValueError:
-            # Отображаем "Некорректный URL"
             flash('Некорректный URL', 'error')
             return redirect(url_for('index'))
         except UrlAlreadyExists:
-            # Отображаем "Страница уже существует"
             flash('Страница уже существует', 'error')
             return redirect(url_for('index'))
         except DatabaseError as e:
@@ -78,6 +76,5 @@ def create_check(id):
         return redirect(url_for('url_detail', id=id))
     except DatabaseError:
         app.logger.error("Ошибка проверки URL")
-        # Отображаем "Произошла ошибка при проверке"
         flash('Произошла ошибка при проверке', 'error')
         return redirect(url_for('url_detail', id=id))
