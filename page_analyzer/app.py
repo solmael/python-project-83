@@ -28,11 +28,13 @@ def index():
             url_id = url_repo.add_url(url)
             flash('URL успешно добавлен', 'success')
             return redirect(url_for('url_detail', id=url_id))
-        except ValueError as e:
-            flash(str(e), 'error')
+        except ValueError:
+            # Отображаем "Некорректный URL"
+            flash('Некорректный URL', 'error')
             return redirect(url_for('index'))
-        except UrlAlreadyExists as e:
-            flash(str(e), 'error')
+        except UrlAlreadyExists:
+            # Отображаем "Страница уже существует"
+            flash('Страница уже существует', 'error')
             return redirect(url_for('index'))
         except DatabaseError as e:
             app.logger.error(f"Ошибка добавления в БД: {e}")
@@ -74,7 +76,8 @@ def create_check(id):
         else:
             flash('URL не найден', 'error')
         return redirect(url_for('url_detail', id=id))
-    except DatabaseError as e:
-        app.logger.error(f"Ошибка создания проверки: {e}")
-        flash('Ошибка создания проверки', 'error')
+    except DatabaseError:
+        app.logger.error("Ошибка проверки URL")
+        # Отображаем "Произошла ошибка при проверке"
+        flash('Произошла ошибка при проверке', 'error')
         return redirect(url_for('url_detail', id=id))
