@@ -20,8 +20,7 @@ def parse_page(
         logger.debug(f"Парсинг страницы: {url}")
         soup = BeautifulSoup(
             html_content, 
-            'html.parser', 
-            from_encoding=encoding
+            'html.parser'
             )
         
         description_tag = soup.find('meta', attrs={"name": "description"})
