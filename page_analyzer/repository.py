@@ -1,6 +1,6 @@
+import logging
 from typing import Dict, List, Optional
 
-import logging
 import requests
 from psycopg2 import connect
 from psycopg2.extras import DictCursor
@@ -39,12 +39,18 @@ class UrlRepository:
         with self._get_connection() as conn:
             with conn.cursor(cursor_factory=DictCursor) as cur:
                 try:
-                    cur.execute("SELECT id FROM urls WHERE name = %s", (normalized_url,))
+                    cur.execute(
+                        "SELECT id FROM urls WHERE name = %s", (normalized_url,)
+                        )
                     existing = cur.fetchone()
                     if existing:
                         raise UrlAlreadyExists("URL уже существует")
 
-                    cur.execute("INSERT INTO urls (name) VALUES (%s) RETURNING id", (normalized_url,))
+                    cur.execute(
+                        "INSERT INTO urls (name) "
+                        "VALUES (%s) RETURNING id", 
+                        (normalized_url,)
+                        )
                     url_id = cur.fetchone()['id']
                     conn.commit()
                     return url_id
@@ -53,13 +59,22 @@ class UrlRepository:
                     raise
                 except Exception as e:
                     conn.rollback()
-                raise DatabaseError(f"Ошибка добавления URL: {e}")
+                    raise DatabaseError(f"Ошибка добавления URL: {e}")
 
     def get_url_by_id(self, url_id: int) -> Optional[Dict]:
         with self._get_connection() as conn:
             with conn.cursor(cursor_factory=DictCursor) as cur:
                 cur.execute("SELECT * FROM urls WHERE id = %s", (url_id,))
                 return cur.fetchone()
+    
+    def get_url_by_name(self, name: str) -> Optional[Dict]:
+        with self._get_connection() as conn:
+            with conn.cursor(cursor_factory=DictCursor) as cur:
+                cur.execute("SELECT id, name FROM urls WHERE name = %s", (name,))
+                result = cur.fetchone()
+                if result:
+                    return result
+                return None
 
     def get_all_urls(self) -> List[dict]:
         with self._get_connection() as conn:
@@ -85,7 +100,9 @@ class UrlRepository:
         with self._get_connection() as conn:
             with conn.cursor(cursor_factory=DictCursor) as cur:
                 try:
-                    cur.execute("SELECT name FROM urls WHERE id = %s", (url_id,))
+                    cur.execute(
+                        "SELECT name FROM urls WHERE id = %s", (url_id,)
+                        )
                     url_record = cur.fetchone()
                     if not url_record:
                         return False
@@ -98,14 +115,21 @@ class UrlRepository:
                     except requests.RequestException as e:
                         raise DatabaseError(f"Ошибка запроса к сайту: {e}")
 
-                    parsed_data = parse_page(response.text, url, encoding=response.encoding)
+                    parsed_data = parse_page(
+                        response.text, url, 
+                        encoding=response.encoding)
                     h1 = parsed_data['h1']
                     title = parsed_data['title']
                     description = parsed_data['description']
                     status_code = response.status_code
 
                     cur.execute("""
-                        INSERT INTO url_checks (url_id, status_code, h1, title, description)
+                        INSERT INTO url_checks (
+                                url_id, 
+                                status_code, 
+                                h1, 
+                                title, 
+                                description)
                         VALUES (%s, %s, %s, %s, %s)
                     """, (url_id, status_code, h1, title, description))
 
