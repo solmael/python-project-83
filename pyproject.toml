@@ -1,5 +1,5 @@
 [project]
-name = "page_analyzer"
+name = "hexlet-code"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -25,4 +25,4 @@ dev-dependencies = [
 ]
 
 [tool.setuptools]
-package-dir = { "hexlet-code" = "page_analyzer" }
+package-dir = { "page_analyzer" = "hexlet-code" }
