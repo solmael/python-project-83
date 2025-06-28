@@ -26,7 +26,7 @@ def index():
         url = request.form['url'].strip()
         try:
             url_id = url_repo.add_url(url)
-            flash('URL успешно добавлен', 'success')
+            flash('Страница успешно добавлена', 'success')
             return redirect(url_for('url_detail', id=url_id))
         except ValueError:
             flash('Некорректный URL', 'error')
