@@ -39,7 +39,7 @@
              value="{{ request.form['url'] if request.method == 'POST' else '' }}"
              class="form-control form-control-lg {% if get_flashed_messages(category_filter=['error']) %}is-invalid{% endif %}"
              required>
-      <button type="submit" class="btn btn-primary btn-lg ms-3 px-5 text-uppercase">Проверить</button>
+      <input type="submit" class="btn btn-primary  btn-lg ms-3 px-5 text-uppercase mx-3" value="Проверить">
     </form>
   </div>
 {% endblock %}
