@@ -32,8 +32,13 @@ def index():
             flash('Некорректный URL', 'error')
             return redirect(url_for('index'))
         except UrlAlreadyExists:
-            flash('Страница уже существует', 'error')
-            return redirect(url_for('index'))
+            existing_url = url_repo.get_url_by_name(url)
+            if existing_url:
+                flash('URL уже существует', 'error')
+                return redirect(url_for('url_detail', id=existing_url['id']))
+            else:
+                flash('URL не найден в БД', 'error')
+                return redirect(url_for('index'))
         except DatabaseError as e:
             app.logger.error(f"Ошибка добавления в БД: {e}")
             flash('Ошибка добавления URL', 'error')
@@ -70,7 +75,7 @@ def create_check(id):
     try:
         success = url_repo.create_check(id)
         if success:
-            flash('Проверка успешно выполнена', 'success')
+            flash('Страница успешно проверена', 'success')
         else:
             flash('URL не найден', 'error')
         return redirect(url_for('url_detail', id=id))
