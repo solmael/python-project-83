@@ -20,33 +20,26 @@
         min-width: 400px;
         border-color: #ced4da;
     }
-
-    .btn-primary {
-        width: 150px;
-        font-weight: bold;
-        background-color: #0d6efd;
-        border-color: #0d6efd;
-    }
 </style>
 {% endblock %}
 
 {% block title %}Главная страница{% endblock %}
 
 {% block content %}
-<div class="card mx-auto" style="max-width: 800px;">
+
+  <div class="card mx-auto" style="max-width: 800px;">
     <h1>Анализатор страниц</h1>
     <p>Бесплатно проверяйте сайты на SEO-пригодность</p>
 
-    <form action="/" method="post">
-        <div class="input-group mb-3">
-            <input type="text"
-                   name="url"
-                   class="form-control {% if get_flashed_messages(category_filter=['error']) %}is-invalid{% endif %}"
-                   placeholder="Введите URL https://www.example.com"    
-                   value="{{ request.form['url'] if request.method == 'POST' else '' }}"
-                   autofocus>
-            <button class="btn btn-primary" type="submit">ПРОВЕРИТЬ</button>
-        </div>
+    <form class="d-flex" action="{{ url_for('index') }}" method="post">
+      <input type="text"
+             id="url"
+             name="url"
+             placeholder="https://www.example.com" 
+             value="{{ request.form['url'] if request.method == 'POST' else '' }}"
+             class="form-control form-control-lg {% if get_flashed_messages(category_filter=['error']) %}is-invalid{% endif %}"
+             required>
+      <button type="submit" class="btn btn-primary btn-lg ms-3 px-5 text-uppercase">Проверить</button>
     </form>
-</div>
+  </div>
 {% endblock %}
