@@ -15,7 +15,7 @@
     </tr>
     <tr>
         <th style="white-space: nowrap;">Дата создания</th>
-        <td>{{ url[2].strftime('%Y-%m-%d') }}</td>
+        <td>{{ url[2].strftime('%Y-%m-%d') if url[2] else '—' }}</td>
     </tr>
 </table>
 
@@ -32,7 +32,7 @@
     }
 </style>
 
-<table class="table" data-test="cheks">
+<table class="table" data-test="checks">
     <thead>
         <tr>
             <th>ID</th>
@@ -51,7 +51,7 @@
                 <td>{{ check[2] or '—' }}</td>
                 <td>{{ check[3] or '—' }}</td>
                 <td>{{ check[4] or '—' }}</td>
-                <td>{{ check[5] or '—' }}</td>
+                <td>{{ check[5].strftime('%Y-%m-%d') if check[5] else '—' }}</td>
             </tr>
         {% endfor %}
     </tbody>
