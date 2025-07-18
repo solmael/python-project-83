@@ -40,18 +40,18 @@
             <th>H1</th>
             <th>Title</th>
             <th>Описание</th>
-            <th>Дата создания</th>
+            <th>Дата проверки</th>
         </tr>
     </thead>
     <tbody>
         {% for check in checks %}
             <tr>
-                <td>{{ check[0] }}</td>
-                <td>{{ check[1] or '—' }}</td>
-                <td>{{ check[2] or '—' }}</td>
-                <td>{{ check[3] or '—' }}</td>
-                <td>{{ check[4] or '—' }}</td>
-                <td>{{ check[5].strftime('%Y-%m-%d') if check[5] else '—' }}</td>
+                <td>{{ check.id }}</td>
+                <td>{{ check.status_code or '—' }}</td>
+                <td>{{ check.h1 or '—' }}</td>
+                <td>{{ check.title or '—' }}</td>
+                <td>{{ check.description or '—' }}</td>
+                <td>{{ check.created_at.strftime('%Y-%m-%d') if check.created_at else '—' }}</td>
             </tr>
         {% endfor %}
     </tbody>
