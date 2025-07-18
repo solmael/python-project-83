@@ -99,45 +99,49 @@ class UrlRepository:
     def create_check(self, url_id: int) -> bool:
         with self._get_connection() as conn:
             with conn.cursor(cursor_factory=DictCursor) as cur:
+                cur.execute("SELECT name FROM urls WHERE id = %s", (url_id,))
+                url_record = cur.fetchone()
+                if not url_record:
+                    return False
+
+                url = url_record['name']
                 try:
-                    cur.execute(
-                        "SELECT name FROM urls WHERE id = %s", (url_id,)
-                        )
-                    url_record = cur.fetchone()
-                    if not url_record:
-                        return False
-
-                    url = url_record['name']
-
-                    try:
-                        response = requests.get(url, timeout=10, verify=True)
-                        response.raise_for_status()
-                    except requests.RequestException as e:
-                        raise DatabaseError(f"Ошибка запроса к сайту: {e}")
-
-                    parsed_data = parse_page(
-                        response.text, url, 
-                        encoding=response.encoding)
-                    h1 = parsed_data['h1']
-                    title = parsed_data['title']
-                    description = parsed_data['description']
+                    response = requests.get(url, timeout=10, verify=True)
                     status_code = response.status_code
 
-                    cur.execute("""
-                        INSERT INTO url_checks (
-                                url_id, 
-                                status_code, 
-                                h1, 
-                                title, 
-                                description)
-                        VALUES (%s, %s, %s, %s, %s)
-                    """, (url_id, status_code, h1, title, description))
+                    if 200 <= status_code < 300:
+                        parsed_data = parse_page(response.text, url, encoding=response.encoding)
+                    else:
+                        parsed_data = {
+                            'h1': None,
+                            'title': None,
+                            'description': None
+                        }
+                except requests.RequestException as e:
+                    status_code = 0
+                    parsed_data = {
+                        'h1': None,
+                        'title': None,
+                        'description': None
+                    }
 
-                    return True
+                h1 = parsed_data['h1']
+                title = parsed_data['title']
+                description = parsed_data['description']
 
-                except Exception as e:
-                    conn.rollback()
-                    raise e
+                cur.execute("""
+                    INSERT INTO url_checks (url_id, status_code, h1, title, description)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (url_id, status_code, h1, title, description))
+                conn.commit()
+                return True
+                
+    def get_last_check_status(self, url_id: int) -> Optional[int]:
+        with self._get_connection() as conn:
+            with conn.cursor(cursor_factory=DictCursor) as cur:
+                cur.execute("SELECT status_code FROM url_checks WHERE url_id = %s ORDER BY created_at DESC LIMIT 1", (url_id,))
+                result = cur.fetchone()
+                return result['status_code'] if result else None
 
     def get_checks_by_url_id(self, url_id: int) -> List[Dict]:
         with self._get_connection() as conn:
