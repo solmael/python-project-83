@@ -75,11 +75,19 @@ def create_check(id):
     try:
         success = url_repo.create_check(id)
         if success:
-            flash('Страница успешно проверена', 'success')
+            status = url_repo.get_last_check_status(id)
+            if status == 404:
+                flash('Страница не найдена (404)', 'warning')
+            elif status == 500:
+                flash('Внутренняя ошибка сервера (500)', 'error')
+            elif status == 0:
+                flash('Произошла сетевая ошибка', 'error')
+            else:
+                flash('Проверка успешно выполнена', 'success')
         else:
             flash('URL не найден', 'error')
         return redirect(url_for('url_detail', id=id))
-    except DatabaseError:
-        app.logger.error("Ошибка проверки URL")
-        flash('Произошла ошибка при проверке', 'error')
+    except DatabaseError as e:
+        app.logger.error(f"Ошибка проверки: {e}")
+        flash('Ошибка создания проверки', 'error')
         return redirect(url_for('url_detail', id=id))
