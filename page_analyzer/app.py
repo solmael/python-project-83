@@ -34,7 +34,7 @@ def index():
         except UrlAlreadyExists:
             existing_url = url_repo.get_url_by_name(url)
             if existing_url:
-                flash('URL уже существует', 'error')
+                flash('Страница уже существует', 'error')
                 return redirect(url_for('url_detail', id=existing_url['id']))
             else:
                 flash('URL не найден в БД', 'error')

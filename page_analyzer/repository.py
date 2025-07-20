@@ -44,7 +44,7 @@ class UrlRepository:
                         )
                     existing = cur.fetchone()
                     if existing:
-                        raise UrlAlreadyExists("URL уже существует")
+                        raise UrlAlreadyExists("Страница уже существует")
 
                     cur.execute(
                         "INSERT INTO urls (name) "
