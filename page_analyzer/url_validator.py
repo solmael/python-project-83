@@ -7,7 +7,7 @@ def validate_url(url):
     if not url:
         return None, 'Заполните это поле'
 
-    if not validators.url(url):
+    if not validators.url(url, public=True):
         return None, 'Некорректный URL'
 
     normalized_url = normalize_url(url)
@@ -20,4 +20,4 @@ def validate_url(url):
 
 def normalize_url(url):
     parsed = urlparse(url)
-    return f"{parsed.scheme}://{parsed.netloc}"
+    return f"{parsed.scheme}://{parsed.netloc}{parsed.path.rstrip('/')}"
