@@ -72,9 +72,7 @@ class UrlRepository:
             with conn.cursor(cursor_factory=DictCursor) as cur:
                 cur.execute("SELECT id, name FROM urls WHERE name = %s", (name,))
                 result = cur.fetchone()
-                if result:
-                    return result
-                return None
+                return result
 
     def get_all_urls(self) -> List[dict]:
         with self._get_connection() as conn:
