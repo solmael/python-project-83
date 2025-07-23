@@ -28,16 +28,13 @@ def index():
             url_id = url_repo.add_url(url)
             flash('Страница успешно добавлена', 'success')
             return redirect(url_for('url_detail', id=url_id))
-        except ValueError:
-            flash('Некорректный URL', 'error')
+        except ValueError as e:
+            flash(str(e), 'error')
             return redirect(url_for('index'))
         except UrlAlreadyExists:
             existing_url = url_repo.get_url_by_name(url)
             if existing_url:
                 flash('Страница уже существует', 'error')
-                return redirect(url_for('url_detail', id=existing_url['id']))
-            else:
-                flash('URL не найден в БД', 'error')
                 return redirect(url_for('index'))
         except DatabaseError as e:
             app.logger.error(f"Ошибка добавления в БД: {e}")
@@ -79,7 +76,7 @@ def create_check(id):
             if status == 404:
                 flash('Страница не найдена (404)', 'warning')
             elif status == 500:
-                flash('Внутренняя ошибка сервера (500)', 'error')
+                flash('Произошла ошибка при проверке', 'error')
             elif status == 0:
                 flash('Произошла сетевая ошибка', 'error')
             else:
