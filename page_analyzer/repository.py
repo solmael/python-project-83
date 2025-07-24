@@ -5,7 +5,7 @@ import requests
 from psycopg2 import connect
 from psycopg2.extras import DictCursor
 
-from .parser import parse_page
+from .parser import parse_page, PageParseError
 from .url_validator import validate_url
 
 logger = logging.getLogger(__name__)
@@ -68,11 +68,13 @@ class UrlRepository:
                 return cur.fetchone()
     
     def get_url_by_name(self, name: str) -> Optional[Dict]:
+        normalized_name, error = validate_url(name)
+        if error:
+            return None
         with self._get_connection() as conn:
             with conn.cursor(cursor_factory=DictCursor) as cur:
-                cur.execute("SELECT id, name FROM urls WHERE name = %s", (name,))
-                result = cur.fetchone()
-                return result
+                cur.execute("SELECT id, name FROM urls WHERE name = %s", (normalized_name,))
+                return cur.fetchone()
 
     def get_all_urls(self) -> List[dict]:
         with self._get_connection() as conn:
@@ -104,14 +106,21 @@ class UrlRepository:
 
                 url = url_record['name']
                 try:
-                    response = requests.get(url, timeout=10, verify=True)
+                    response = requests.get(url, timeout=30, verify=True)
                     status_code = response.status_code
                 except requests.RequestException as e:
+                    logger.error(f"Ошибка запроса к {url}: {e}")
                     status_code = 0
                     parsed_data = {'h1': None, 'title': None, 'description': None}
                 else:
                     if 200 <= status_code < 300:
-                        parsed_data = parse_page(response.text, url)
+                        try:
+                            parsed_data = parse_page(response.text, url)
+                            if parsed_data is None:
+                                parsed_data = {'h1': None, 'title': None, 'description': None}
+                        except PageParseError as e:
+                            logger.error(f"Ошибка парсинга: {e}")
+                            parsed_data = {'h1': None, 'title': None, 'description': None}
                     else:
                         parsed_data = {'h1': None, 'title': None, 'description': None}
 
