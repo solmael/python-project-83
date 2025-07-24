@@ -7,7 +7,7 @@ def validate_url(url):
     if not url:
         return None, 'Заполните это поле'
 
-    if not validators.url(url, public=True):
+    if not validators.url(url):
         return None, 'Некорректный URL'
 
     normalized_url = normalize_url(url)

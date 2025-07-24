@@ -106,22 +106,14 @@ class UrlRepository:
                 try:
                     response = requests.get(url, timeout=10, verify=True)
                     status_code = response.status_code
-
-                    if 200 <= status_code < 300:
-                        parsed_data = parse_page(response.text, url, encoding=response.encoding)
-                    else:
-                        parsed_data = {
-                            'h1': None,
-                            'title': None,
-                            'description': None
-                        }
                 except requests.RequestException as e:
                     status_code = 0
-                    parsed_data = {
-                        'h1': None,
-                        'title': None,
-                        'description': None
-                    }
+                    parsed_data = {'h1': None, 'title': None, 'description': None}
+                else:
+                    if 200 <= status_code < 300:
+                        parsed_data = parse_page(response.text, url)
+                    else:
+                        parsed_data = {'h1': None, 'title': None, 'description': None}
 
                 h1 = parsed_data['h1']
                 title = parsed_data['title']
