@@ -20,4 +20,4 @@ def validate_url(url):
 
 def normalize_url(url):
     parsed = urlparse(url)
-    return f"{parsed.scheme}://{parsed.netloc}"
+    return f"{parsed.scheme}://{parsed.netloc}{parsed.path.rstrip('/')}"
