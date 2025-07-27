@@ -31,7 +31,9 @@ def index():
         except ValueError as e:
             flash(str(e), 'danger')
         except UrlAlreadyExists:
-            flash('Страница уже существует', 'danger')
+            existing_url = url_repo.get_url_by_name(url)
+            flash('Страница уже существует', 'warning')
+            return redirect(url_for('url_detail', id=existing_url['id']))
         except DatabaseError as e:
             app.logger.error(f"Ошибка добавления в БД: {e}")
             flash('Ошибка добавления URL', 'danger')
