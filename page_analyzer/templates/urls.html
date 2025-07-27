@@ -17,32 +17,22 @@
         <tr>
             <th>ID</th>
             <th>Имя</th>
-            <th>Дата добавления</th>
-            <th>Дата последней проверки</th>
-            <th>Код последней проверки</th>
+            <th>Последняя проверка</th>
+            <th>Код ответа</th>
         </tr>
     </thead>
     <tbody>
         {% for url in urls %}
         <tr>
             <td>{{ url[0] }}</td>
-            <td><a href="{{ url_for('url_detail', id=url[0]) }}">{{ url[1] }}</a></td>
-            <td>{{ url[2].strftime('%Y-%m-%d') }}</td>
             <td>
-                {% set last_check_date = url[3] %}
-                {% if last_check_date %}
-                    {{ last_check_date.strftime('%Y-%m-%d') }}
-                {% else %}
-                    —
-                {% endif %}
+                <a href="{{ url_for('url_detail', id=url[0]) }}">{{ url[1] }}</a>
             </td>
             <td>
-                {% set last_check_status = url[4] %}
-                {% if last_check_status %}
-                    {{ last_check_status }}
-                {% else %}
-                    —
-                {% endif %}
+                {% set last_check_date = url[2] %}{% if last_check_date %}{{ last_check_date.strftime('%Y-%m-%d') }}{% else %}—{% endif %}
+            </td>
+            <td>
+                {% set last_check_status = url[3] %}{% if last_check_status %}{{ last_check_status }}{% else %}—{% endif %}
             </td>
         </tr>
         {% endfor %}
