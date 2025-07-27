@@ -2,7 +2,7 @@ import logging
 import os
 
 from dotenv import load_dotenv
-from flask import Flask, flash, redirect, render_template, request, url_for
+from flask import Flask, flash, get_flashed_messages, redirect, render_template, request, url_for
 
 from .repository import DatabaseError, UrlAlreadyExists, UrlRepository
 
@@ -59,6 +59,8 @@ def url_detail(id):
 def urls():
     try:
         urls = url_repo.get_all_urls()
+        if get_flashed_messages(category_filter=['danger']):
+            return render_template('urls.html', urls=urls), 422
         return render_template('urls.html', urls=urls)
     except DatabaseError as e:
         app.logger.error(f"Ошибка получения списка URL: {e}")
