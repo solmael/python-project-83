@@ -37,20 +37,20 @@
         <tr>
             <th>ID</th>
             <th>Код ответа</th>
-            <th>H1</th>
-            <th>Title</th>
-            <th>Описание</th>
-            <th>Дата проверки</th>
+            <th>h1</th>
+            <th>title</th>
+            <th>description</th>
+            <th>Дата создания</th>
         </tr>
     </thead>
     <tbody>
         {% for check in checks %}
             <tr>
                 <td>{{ check.id }}</td>
-                <td>{{ check.status_code or '—' }}</td>
-                <td>{{ check.h1 or '—' }}</td>
-                <td>{{ check.title or '—' }}</td>
-                <td>{{ check.description or '—' }}</td>
+                <td>{{ check.status_code}}</td>
+                <td>{{ check.h1}}</td>
+                <td>{{ check.title}}</td>
+                <td>{{ check.description}}</td>
                 <td>{{ check.created_at.strftime('%Y-%m-%d') if check.created_at else '—' }}</td>
             </tr>
         {% endfor %}
