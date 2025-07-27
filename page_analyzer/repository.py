@@ -80,17 +80,16 @@ class UrlRepository:
         with self._get_connection() as conn:
             with conn.cursor(cursor_factory=DictCursor) as cur:
                 cur.execute("""
-                    SELECT 
-                        u.id, 
-                        u.name, 
-                        DATE(u.created_at) AS created_at,
-                        (SELECT MAX(c.created_at) 
-                            FROM url_checks c 
-                            WHERE c.url_id = u.id),
-                        (SELECT c.status_code 
-                            FROM url_checks c 
-                            WHERE c.url_id = u.id 
-                            ORDER BY c.created_at DESC LIMIT 1)
+                    SELECT
+                        u.id,
+                        u.name,
+                        (SELECT MAX(c.created_at)
+                        FROM url_checks c
+                        WHERE c.url_id = u.id),
+                        (SELECT c.status_code
+                        FROM url_checks c
+                        WHERE c.url_id = u.id
+                        ORDER BY c.created_at DESC LIMIT 1)
                     FROM urls u
                     ORDER BY u.created_at DESC
                 """)
