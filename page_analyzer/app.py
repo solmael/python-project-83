@@ -29,14 +29,12 @@ def index():
             flash('Страница успешно добавлена', 'success')
             return redirect(url_for('url_detail', id=url_id))
         except ValueError as e:
-            flash(str(e), 'error')
-            return redirect(url_for('index'))
+            flash(str(e), 'danger')
         except UrlAlreadyExists:
-            flash('Страница уже существует', 'error')
-            return redirect(url_for('index'))
+            flash('Страница уже существует', 'danger')
         except DatabaseError as e:
             app.logger.error(f"Ошибка добавления в БД: {e}")
-            flash('Ошибка добавления URL', 'error')
+            flash('Ошибка добавления URL', 'danger')
             return redirect(url_for('index'))
 
     return render_template('index.html')
@@ -50,7 +48,7 @@ def url_detail(id):
         return render_template('url_detail.html', url=url, checks=checks)
     except DatabaseError as e:
         app.logger.error(f"Ошибка получения данных: {e}")
-        flash('Ошибка загрузки данных', 'error')
+        flash('Ошибка загрузки данных', 'danger')
         return redirect(url_for('index'))
 
 
@@ -61,7 +59,7 @@ def urls():
         return render_template('urls.html', urls=urls)
     except DatabaseError as e:
         app.logger.error(f"Ошибка получения списка URL: {e}")
-        flash('Ошибка загрузки данных', 'error')
+        flash('Ошибка загрузки данных', 'danger')
         return redirect(url_for('index'))
 
 
@@ -74,15 +72,15 @@ def create_check(id):
             if status == 404:
                 flash('Страница не найдена (404)', 'warning')
             elif status == 500:
-                flash('Произошла ошибка при проверке', 'error')
+                flash('Произошла ошибка при проверке', 'danger')
             elif status == 0:
-                flash('Произошла сетевая ошибка', 'error')
+                flash('Произошла сетевая ошибка', 'danger')
             else:
-                flash('Проверка успешно выполнена', 'success')
+                flash('Страница успешно проверена', 'success')
         else:
-            flash('URL не найден', 'error')
+            flash('URL не найден', 'danger')
         return redirect(url_for('url_detail', id=id))
     except DatabaseError as e:
         app.logger.error(f"Ошибка проверки: {e}")
-        flash('Ошибка создания проверки', 'error')
+        flash('Ошибка создания проверки', 'danger')
         return redirect(url_for('url_detail', id=id))
