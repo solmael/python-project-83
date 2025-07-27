@@ -30,6 +30,7 @@ def index():
             return redirect(url_for('url_detail', id=url_id))
         except ValueError as e:
             flash(str(e), 'danger')
+            return redirect(url_for('urls')) 
         except UrlAlreadyExists:
             existing_url = url_repo.get_url_by_name(url)
             flash('Страница уже существует', 'warning')
