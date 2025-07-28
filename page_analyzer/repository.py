@@ -5,7 +5,7 @@ import requests
 from psycopg2 import connect
 from psycopg2.extras import DictCursor
 
-from .parser import parse_page, PageParseError
+from .parser import PageParseError, parse_page
 from .url_validator import validate_url
 
 logger = logging.getLogger(__name__)
@@ -73,7 +73,10 @@ class UrlRepository:
             return None
         with self._get_connection() as conn:
             with conn.cursor(cursor_factory=DictCursor) as cur:
-                cur.execute("SELECT id, name FROM urls WHERE name = %s", (normalized_name,))
+                cur.execute(
+                    "SELECT id, name FROM urls WHERE name = %s", 
+                    (normalized_name,)
+                    )
                 return cur.fetchone()
 
     def get_all_urls(self) -> List[dict]:
@@ -110,25 +113,47 @@ class UrlRepository:
                 except requests.RequestException as e:
                     logger.error(f"Ошибка запроса к {url}: {e}")
                     status_code = 0
-                    parsed_data = {'h1': None, 'title': None, 'description': None}
+                    parsed_data = {
+                        'h1': None, 
+                        'title': None, 
+                        'description': None
+                        }
                 else:
                     if 200 <= status_code < 300:
                         try:
                             parsed_data = parse_page(response.text, url)
                             if parsed_data is None:
-                                parsed_data = {'h1': None, 'title': None, 'description': None}
+                                parsed_data = {
+                                    'h1': None, 
+                                    'title': None, 
+                                    'description': None
+                                    }
                         except PageParseError as e:
                             logger.error(f"Ошибка парсинга: {e}")
-                            parsed_data = {'h1': None, 'title': None, 'description': None}
+                            parsed_data = {
+                                'h1': None, 
+                                'title': None, 
+                                'description': None
+                                }
                     else:
-                        parsed_data = {'h1': None, 'title': None, 'description': None}
+                        parsed_data = {
+                            'h1': None, 
+                            'title': None, 
+                            'description': None
+                            }
 
                 h1 = parsed_data['h1']
                 title = parsed_data['title']
                 description = parsed_data['description']
 
                 cur.execute("""
-                    INSERT INTO url_checks (url_id, status_code, h1, title, description)
+                    INSERT INTO url_checks (
+                            url_id, 
+                            status_code, 
+                            h1, 
+                            title, 
+                            description
+                            )
                     VALUES (%s, %s, %s, %s, %s)
                 """, (url_id, status_code, h1, title, description))
                 conn.commit()
@@ -137,7 +162,11 @@ class UrlRepository:
     def get_last_check_status(self, url_id: int) -> Optional[int]:
         with self._get_connection() as conn:
             with conn.cursor(cursor_factory=DictCursor) as cur:
-                cur.execute("SELECT status_code FROM url_checks WHERE url_id = %s ORDER BY created_at DESC LIMIT 1", (url_id,))
+                cur.execute(
+                    "SELECT status_code FROM url_checks "
+                    "WHERE url_id = %s "
+                    "ORDER BY created_at DESC LIMIT 1", 
+                    (url_id,))
                 result = cur.fetchone()
                 return result['status_code'] if result else None
 
