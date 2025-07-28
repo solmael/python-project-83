@@ -116,8 +116,7 @@ class UrlRepository:
                     parsed_data = {
                         'h1': None, 
                         'title': None, 
-                        'description': None
-                        }
+                        'description': None}
                 else:
                     if 200 <= status_code < 300:
                         try:
