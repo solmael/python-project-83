@@ -28,25 +28,8 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'fallback-secret-key')
 url_repo = UrlRepository(DATABASE_URL)
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET'])
 def index():
-    if request.method == 'POST':
-        url = request.form['url'].strip()
-        try:
-            url_id = url_repo.add_url(url)
-            flash('Страница успешно добавлена', 'success')
-            return redirect(url_for('url_detail', id=url_id))
-        except ValueError as e:
-            flash(str(e), 'danger')
-        except UrlAlreadyExists:
-            existing_url = url_repo.get_url_by_name(url)
-            flash('Страница уже существует', 'warning')
-            return redirect(url_for('url_detail', id=existing_url['id']))
-        except DatabaseError as e:
-            app.logger.error(f"Ошибка добавления в БД: {e}")
-            flash('Ошибка добавления URL', 'danger')
-            return redirect(url_for('index'))
-
     return render_template('index.html')
 
 
@@ -62,17 +45,36 @@ def url_detail(id):
         return redirect(url_for('index'))
 
 
-@app.route('/urls')
+@app.route('/urls', methods=['GET', 'POST'])
 def urls():
+    if request.method == 'POST':
+        url = request.form['url'].strip()
+        try:
+            url_id = url_repo.add_url(url)
+            flash('Страница успешно добавлена', 'success')
+            return redirect(url_for('url_detail', id=url_id))
+        except ValueError as e:
+            flash(str(e), 'danger')
+            urls = url_repo.get_all_urls()
+            return render_template('index.html', urls=urls), 422
+        except UrlAlreadyExists:
+            existing_url = url_repo.get_url_by_name(url)
+            flash('Страница уже существует', 'warning')
+            return redirect(url_for('url_detail', id=existing_url['id']))
+        except DatabaseError as e:
+            app.logger.error(f"Ошибка добавления в БД: {e}")
+            flash('Ошибка добавления URL', 'danger')
+            urls = url_repo.get_all_urls()
+            return render_template('urls.html', urls=urls), 500
+    
+    # get
     try:
         urls = url_repo.get_all_urls()
-        if get_flashed_messages(category_filter=['danger']):
-            return render_template('urls.html', urls=urls), 422
         return render_template('urls.html', urls=urls)
     except DatabaseError as e:
         app.logger.error(f"Ошибка получения списка URL: {e}")
         flash('Ошибка загрузки данных', 'danger')
-        return redirect(url_for('index'))
+        return render_template('index.html'), 500
 
 
 @app.route('/urls/<int:id>/checks', methods=['POST'])
