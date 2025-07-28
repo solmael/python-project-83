@@ -2,7 +2,15 @@ import logging
 import os
 
 from dotenv import load_dotenv
-from flask import Flask, flash, get_flashed_messages, redirect, render_template, request, url_for
+from flask import (
+    Flask,
+    flash,
+    get_flashed_messages,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 
 from .repository import DatabaseError, UrlAlreadyExists, UrlRepository
 
