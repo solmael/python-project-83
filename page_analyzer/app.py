@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 from flask import (
     Flask,
     flash,
-    get_flashed_messages,
     redirect,
     render_template,
     request,
