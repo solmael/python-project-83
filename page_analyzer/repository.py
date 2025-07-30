@@ -112,47 +112,38 @@ class UrlRepository:
                     status_code = response.status_code
                 except requests.RequestException as e:
                     logger.error(f"Ошибка запроса к {url}: {e}")
-                    status_code = 0
-                    parsed_data = {
-                        'h1': None, 
-                        'title': None, 
-                        'description': None}
-                else:
-                    if 200 <= status_code < 300:
-                        try:
-                            parsed_data = parse_page(response.text, url)
-                            if parsed_data is None:
-                                parsed_data = {
-                                    'h1': None, 
-                                    'title': None, 
-                                    'description': None
-                                    }
-                        except PageParseError as e:
-                            logger.error(f"Ошибка парсинга: {e}")
-                            parsed_data = {
-                                'h1': None, 
-                                'title': None, 
-                                'description': None
-                                }
-                    else:
+                    return False
+                
+                if not (200 <= status_code < 300):
+                    return False
+                
+                try:
+                    parsed_data = parse_page(response.text, url)
+                    if parsed_data is None:
                         parsed_data = {
-                            'h1': None, 
-                            'title': None, 
+                            'h1': None,
+                            'title': None,
                             'description': None
-                            }
-
+                        }
+                except PageParseError as e:
+                    logger.error(f"Ошибка парсинга: {e}")
+                    parsed_data = {
+                        'h1': None,
+                        'title': None,
+                        'description': None
+                    }
+                
                 h1 = parsed_data['h1']
                 title = parsed_data['title']
                 description = parsed_data['description']
-
                 cur.execute("""
                     INSERT INTO url_checks (
-                            url_id, 
-                            status_code, 
-                            h1, 
-                            title, 
-                            description
-                            )
+                        url_id, 
+                        status_code, 
+                        h1, 
+                        title, 
+                        description
+                    )
                     VALUES (%s, %s, %s, %s, %s)
                 """, (url_id, status_code, h1, title, description))
                 conn.commit()
