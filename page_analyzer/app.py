@@ -81,17 +81,9 @@ def create_check(id):
     try:
         success = url_repo.create_check(id)
         if success:
-            status = url_repo.get_last_check_status(id)
-            if status == 404:
-                flash('Страница не найдена (404)', 'warning')
-            elif status == 500:
-                flash('Произошла ошибка при проверке', 'danger')
-            elif status == 0:
-                flash('Произошла сетевая ошибка', 'danger')
-            else:
-                flash('Страница успешно проверена', 'success')
+            flash('Страница успешно проверена', 'success')
         else:
-            flash('URL не найден', 'danger')
+            flash('Произошла ошибка при проверке', 'danger')
         return redirect(url_for('url_detail', id=id))
     except DatabaseError as e:
         app.logger.error(f"Ошибка проверки: {e}")
