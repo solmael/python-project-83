@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 def parse_page(
         html_content: str, 
         url: str, 
-        encoding: str = 'utf-8'
         ) -> Dict[str, Any]:
     try:
         logger.debug(f"Парсинг страницы: {url}")
