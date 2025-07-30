@@ -66,7 +66,6 @@ def urls():
             urls = url_repo.get_all_urls()
             return render_template('urls.html', urls=urls), 500
     
-    # get
     try:
         urls = url_repo.get_all_urls()
         return render_template('urls.html', urls=urls)
